@@ -20,10 +20,10 @@ public class Server {
                 Socket socket = server.accept();
                 if (canAcceptMoreClients()) {
                     // Start a new Thread for new client
-		    System.out.println("Now hosting " + Thread.activeCount() + " clients.");
-                    Thread clientThread = new Thread(new ClientRunnable(socket));
+		            System.out.println("Now hosting " + Thread.activeCount() + " client(s).");
+                    Thread clientThread = new Thread(new ClientRunnable(socket, this));
                     clientThread.start();
-		    
+
                 } else {
                     // We reached the max number of clients. Send data to client indicating they can't connect
                     PrintWriter printWriter = new PrintWriter(socket.getOutputStream(), true);
@@ -50,12 +50,20 @@ public class Server {
     }
 
     /***
+     *
+     * @return Number of clients being hosted at this time
+     */
+    public int getNumClientsHosting() {
+        return Thread.activeCount() - 1;
+    }
+
+    /***
      * Displays server info when launching the server
      */
     public void displayServerInfo() {
         System.out.println(Constants.serverName +" hosted on port number: " + Constants.portNumber);
         System.out.println("Clients can now begin connecting.");
-	System.out.println("Server can support " + Constants.maxClientNum + " clients.");
+	System.out.println("Server can support " + Constants.maxClientNum + " client(s).");
     }
 
     public static void main(String[] args) {

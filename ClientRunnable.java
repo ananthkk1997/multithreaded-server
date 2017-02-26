@@ -14,15 +14,17 @@ public class ClientRunnable implements Runnable{
 
     public BufferedReader bufferedReader;
     public PrintWriter printWriter;
+    private Server server;
 
-    public ClientRunnable(Socket socket) {
+    public ClientRunnable(Socket socket, Server server) {
         this.socket = socket;
+        this.server = server;
         try {
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.printWriter = new PrintWriter(socket.getOutputStream(), true);
         } catch (IOException e) {
-            // Problem connecting client socket
-            System.out.println("Error connecting to client socket from Runnable");
+            // Problem connecting client socket data output stream
+            System.out.println("Problem with " + socket.getRemoteSocketAddress().toString() + "'s connection.");
         }
     }
 
@@ -41,8 +43,8 @@ public class ClientRunnable implements Runnable{
                     parse(line);
                 }
             } catch (IOException e) {
-                // Problem connecting client socket
-                System.out.println("Error connecting to client socket from Runnable");
+                // Problem connecting client socket. Client has disconnected
+                printDisconnectedMessages();
                 kill();
             }
         }
@@ -58,7 +60,9 @@ public class ClientRunnable implements Runnable{
         // Handle all server codes
         switch (code) {
             case Constants.SERVER_QUIT_CODE:
-                // If we receive the quit message from the user, kill thread
+                // If we receive the quit message from the user, disconnect client
+                // and kill thread
+                printDisconnectedMessages();
                 kill();
                 break;
             case Constants.SERVER_OK_CODE:
@@ -67,6 +71,15 @@ public class ClientRunnable implements Runnable{
                 printWriter.println(Constants.SERVER_OK_CODE + Constants.SERVER_CODE_CONNECTOR + " Received!");
 
         }
+    }
+
+    /***
+    *  Indicates that this client has disconnected, and displays the current
+    *  number of clients being hosted
+    */
+    public void printDisconnectedMessages() {
+        System.out.println("Client " + socket.getRemoteSocketAddress().toString() + " has disconnected.");
+        System.out.println("Now hosting " + (this.server.getNumClientsHosting() - 1) + " client(s).");
     }
 
     /***

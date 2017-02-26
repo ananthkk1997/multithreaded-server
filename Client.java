@@ -16,7 +16,6 @@ public class Client {
     public PrintWriter printWriter;
     public Scanner scanner;
 
-
     public Client() {
         try {
             this.socket = new Socket("127.0.0.1", Constants.portNumber);
@@ -48,10 +47,17 @@ public class Client {
                         System.out.println("Server response: " + response);
                         break;
                     } else {
-                        // Send what user typed with Chatting server code
-                        String response = toServer(Constants.SERVER_OK_CODE + Constants.SERVER_CODE_CONNECTOR
-                                + message);
-                        System.out.println("Server response: " + response);
+                        // If user types newline character
+                        if (message.equals("")) {
+                            String response = toServer(Constants.SERVER_OK_CODE + Constants.SERVER_CODE_CONNECTOR
+                                    + "ENTER");
+                            System.out.println("Server response: " + response);
+                        } else {
+                            // Send what user typed with Chatting server code
+                            String response = toServer(Constants.SERVER_OK_CODE + Constants.SERVER_CODE_CONNECTOR
+                                    + message);
+                            System.out.println("Server response: " + response);
+                        }
                     }
                 }
             }
@@ -59,7 +65,6 @@ public class Client {
             // No server running with this IP and this PortNumber, exit.
         }
     }
-
 
     /***
      * Sends a message to server and gets a response from it
